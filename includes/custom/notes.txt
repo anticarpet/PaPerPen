@@ -1,0 +1,22 @@
+templates: used to play with different data types;
+USE OUTSIDE MAIN;
+```
+template  <typename T> T myMax(T x, T y) 
+  ^           ^        ^    ^   ^    ^    
+  keyword    1*       2* fn name  3*
+
+  1*: typename/class are interchangeable keywords
+  2*: the nave you've given as an arbitary type, in this case it 
+  is used as an output type
+  3*: ` ` ` ` `, it is used as the type of argument
+
+
+
+{
+    return (x > y) ? x : y;  // the code itself, unrelated
+}
+```
+where it is written exactly as is. improvise, adapt, overcome :)
+
+template <class T, int N> ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+the int N must be known at compile time, just like std::array<float, 5>;

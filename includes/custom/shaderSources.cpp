@@ -1,0 +1,122 @@
+#include "../../include/glad/glad.h"
+#include <GLFW/glfw3.h>
+#include "../../includes/glm/glm.hpp"
+#include <iostream>
+#include "../../includes/glm/gtc/matrix_transform.hpp"
+#include "shaderSources.hpp"
+// #define STB_IMAGE_IMPLEMENTATION
+// #include "../../includes/stb/stb_image.h
+
+#include <vector>
+#include "Vobj.hpp"
+
+const char *vertexShaderSource = "#version 330 core\n"
+                                 "layout (location = 0) in vec4 aPos;\n"
+                                 "layout (location = 2) in vec2 Tex;\n"
+                                 "layout (location = 1) in vec4 Norm;\n"
+                                 "uniform mat4 rix;\n"
+                                 "uniform mat4 MVP;\n"
+                                 "out vec4 fpos;\n"
+                                 "out vec4 Norma;\n"
+                                 "out mat4 NormaMat;\n"
+                                 "out mat4 MVPat;\n"
+                                 "out vec2 aTexCoords;\n"
+                                 "void main()\n"
+                                 "{\n"
+                                 "   gl_Position = MVP * rix * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                 "   fpos = rix * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                 "   aTexCoords = Tex;\n"
+                                 "   Norma = rix * vec4(Norm.x, Norm.y, Norm.z, 0.0);\n"
+                                 "   MVPat = MVP;\n"
+                                 "   NormaMat = rix;\n"
+                                 "}\0";
+
+const char *fragmentShaderSource = "#version 330 core\n"
+                                   "out vec4 FragColor;\n"
+                                   "uniform vec4 essam;\n"
+                                   "in vec4 fpos;\n"
+                                   "in vec4 Norma;\n"
+                                   "in mat4 NormaMat;\n"
+                                   "in mat4 MVPat;\n"
+                                   "in vec2 aTexCoords;\n"
+                                   "uniform sampler2D uTexture;\n"
+                                   "uniform vec4 light;\n"
+                                   "void main()\n"
+                                   "{\n"
+                                   "   FragColor = texture(uTexture, vec2(aTexCoords.x*1.0,aTexCoords.y*1.0));\n"
+                                   "   //FragColor *= dot(normalize(NormaMat*Norma),normalize(vec4(10,-10,10,1)));\n"
+                                   "  FragColor *= 0.3 + 0.7*dot(normalize(Norma),normalize(light- fpos));\n"
+
+                                   "   //FragColor = essam;\n"
+                                   "   //FragColor = fpos;\n"
+                                   "}\n\0";
+
+const char *Vshs2 = "#version 330 core\n"
+                    "layout (location = 0) in vec4 aPos;\n"
+                    "layout (location = 1) in vec4 aCol;\n"
+                    "uniform mat4 rix;\n"
+                    "out vec4 fpos;\n"
+                    "out vec2 aTexCoords;\n"
+                    "void main()\n"
+                    "{\n"
+                    "   gl_Position = rix * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                    "   fpos = aCol;\n"
+                    "   aTexCoords = vec2(aPos.x/10.0f+0.5f, aPos.z/10.0f+0.5f);\n"
+                    "}\0";
+
+const char *Fshs2 = "#version 330 core\n"
+                    "out vec4 FragColor;\n"
+                    "uniform vec4 essam;\n"
+                    "in vec4 fpos;\n"
+                    "in vec2 aTexCoords;\n"
+                    "uniform sampler2D uTexture;\n"
+                    "void main()\n"
+                    "{\n"
+                    "   FragColor = texture(uTexture, aTexCoords);\n"
+                    "   //FragColor = vec4(1.0f,1.0f,1.0f,1.0f);\n"
+                    "   //FragColor = fpos;\n"
+                    "}\n\0";
+
+// for the quad
+const char *quadV =
+    "#version 330 core\n"
+    "layout (location = 0) in vec4 aPos;\n"
+    "layout (location = 2) in vec2 Tex;\n"
+    "layout (location = 1) in vec4 Norm;\n"
+    "uniform mat4 rix;\n"
+    "uniform mat4 MVP;\n"
+    "out vec4 fpos;\n"
+    "out vec4 Norma;\n"
+    "out mat4 NormaMat;\n"
+    "out mat4 MVPat;\n"
+    "out vec2 aTexCoords;\n"
+    "void main()\n"
+    "{\n"
+    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   fpos = rix * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+    "   aTexCoords = Tex;\n"
+    "   Norma = rix * vec4(Norm.x, Norm.y, Norm.z, 0.0);\n"
+    "   MVPat = MVP;\n"
+    "   NormaMat = rix;\n"
+    "}\0";
+
+const char *quadF =
+    "#version 330 core\n"
+    "out vec4 FragColor;\n"
+    "uniform vec4 essam;\n"
+    "in vec4 fpos;\n"
+    "in vec4 Norma;\n"
+    "in mat4 NormaMat;\n"
+    "in mat4 MVPat;\n"
+    "in vec2 aTexCoords;\n"
+    "uniform sampler2D uTexture;\n"
+    "uniform vec4 light;\n"
+    "void main()\n"
+    "{\n"
+    "   FragColor = texture(uTexture, vec2(aTexCoords.x*1.0,aTexCoords.y*1.0));\n"
+    "   //FragColor = vec4(1.0,1.0,0.0,1.0);\n"
+    "  //FragColor *= 0.3 + 0.7*dot(normalize(Norma),normalize(light- fpos));\n"
+
+    "   //FragColor = essam;\n"
+    "   //FragColor = fpos;\n"
+    "}\n\0";
