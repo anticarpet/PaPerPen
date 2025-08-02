@@ -28,7 +28,9 @@ class FBO{
     void createFBO(); //makes the fbo
     void bindTex(unsigned int&, int, int); //bind texture to render to
     void use();// bind that framebuffer, it should be useless
+    public:
     void render();// render whats in its queue into the texture
+    public:
     void addQueue(Vobj *, int);// add a Vobj ADDRESS into its queue
     void clearTex(float, float, float, float); //clears the texture for rendering
 
@@ -43,6 +45,11 @@ class FBO{
 
 
 
+};
+
+class SCREEN : FBO{
+    public:
+    void render();
 };
 
 #endif

@@ -249,7 +249,7 @@ glm::mat4 rotateAbout(glm::mat4 mat, float ang, glm::vec3 vec, glm::vec4 poi)
 void adham(GLFWwindow *window, double &xPos, double &yPos, glm::vec4 &cPos, glm::vec4 &dir)
 {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-    float speed = 0.4f;
+    float speed = 2.0f;
     int state = glfwGetKey(window, GLFW_KEY_E);
     int w = glfwGetKey(window, GLFW_KEY_W);
     int a = glfwGetKey(window, GLFW_KEY_A);
@@ -388,6 +388,31 @@ void activeTex(int slot, int ID)
     glBindTexture(GL_TEXTURE_2D, ID);
 }
 
+void quickTexture( unsigned int &tex, const uint8_t *data, uint8_t width, uint8_t height){
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    makeTexture(data, width, height);
+
+}
+
+void quickTexture( unsigned int &tex, const char* image, uint8_t width, uint8_t height){
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+    makeImgTexture(image);
+
+}
+
+void quickTexture( unsigned int &tex, int width, int height){
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+}
+
 // bismillah: mesh
 //  mesh() takes in a function and returns the array(s) of Vpos, texPos, and normals
 //  matmap() takes in u and v, is a custom defined function and it returns a matrix transformation
@@ -516,48 +541,54 @@ void Vobj::useCubeTemplate(glm::vec3 dims){
         x,y,-1*z,
         x,-1*y,z,
         x,-1*y,-1*z,
-        x,y,-1*z,
         x,-1*y,z,
+        x,y,-1*z,
+        
 
         //-x
         -1*x,y,z,
         -1*x,y,-1*z,
         -1*x,-1*y,z,
         -1*x,-1*y,-1*z,
-        -1*x,y,-1*z,
         -1*x,-1*y,z,
+        -1*x,y,-1*z,
+        
 
         //+y
         x,y,z,
         x,y,-1*z,
         -1*x,y,z,
         -1*x,y,-1*z,
-        x,y,-1*z,
         -1*x,y,z,
+        x,y,-1*z,
+        
 
         //-y
         x,-1*y,z,
         x,-1*y,-1*z,
         -1*x,-1*y,z,
         -1*x,-1*y,-1*z,
-        x,-1*y,-1*z,
         -1*x,-1*y,z,
+        x,-1*y,-1*z,
+        
 
         //+z
         x,y,z,
         x,-1*y,z,
         -1*x,y,z,
         -1*x,-1*y,z,
-        x,-1*y,z,
         -1*x,y,z,
+        x,-1*y,z,
+        
 
         //-z
         x,y,-1*z,
         x,-1*y,-1*z,
         -1*x,y,-1*z,
         -1*x,-1*y,-1*z,
-        x,-1*y,-1*z,
         -1*x,y,-1*z,
+        x,-1*y,-1*z,
+        
 
        
 
@@ -698,4 +729,40 @@ std::vector<float> transList4(std::vector<float> list, glm::mat4 mat){
 
 void Vobj::transBuffer(int layout, glm::mat4 mat){
     VBOdata[layout] = transList4(VBOdata[layout],mat);
+}
+
+//pattern texture thingy
+
+std::vector<uint8_t> checkerboard(int patnum, glm::vec4 C1, glm::vec4 C2){
+    std::vector<uint8_t> pattern;
+    for (int j = 0; j < (patnum) / 2; j++)
+    {
+        /* code */
+
+        for (int i = 0; i < (patnum) / 2; i++)
+        {
+            pattern.push_back(C1.x);
+            pattern.push_back(C1.y);
+            pattern.push_back(C1.z);
+            pattern.push_back(C1.w);
+            pattern.push_back(C2.x);
+            pattern.push_back(C2.y);
+            pattern.push_back(C2.z);
+            pattern.push_back(C2.w);
+        }
+        for (int i = 0; i < (patnum) / 2; i++)
+        {
+            pattern.push_back(C2.x);
+            pattern.push_back(C2.y);
+            pattern.push_back(C2.z);
+            pattern.push_back(C2.w);
+            pattern.push_back(C1.x);
+            pattern.push_back(C1.y);
+            pattern.push_back(C1.z);
+            pattern.push_back(C1.w);
+        }
+    }
+
+    return pattern;
+
 }

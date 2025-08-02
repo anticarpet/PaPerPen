@@ -107,6 +107,9 @@ glm::mat4 rotateAbout(glm::mat4, float, glm::vec3, glm::vec4);
 void makeImgTexture(const char *);
 void makeTexture(const uint8_t *, uint8_t, uint8_t);
 void makeEmptyTexture(int, int);
+void quickTexture( unsigned int &tex, const uint8_t *data, uint8_t width, uint8_t height);
+void quickTexture( unsigned int &tex, const char* image, uint8_t width, uint8_t height);
+void quickTexture( unsigned int &tex, int width, int height);
 
 void activeTex(int, int);
 
@@ -114,6 +117,9 @@ void activeTex(int, int);
 std::vector<float> mesh(std::function<glm::mat4(float u, float v)> matmap,glm::vec4, int);
 std::vector<float> meshTexMap(int);
 #endif
+
+// textures misc
+std::vector<uint8_t> checkerboard(int patnum, glm::vec4 C1, glm::vec4 C2);
 
 // for array pointer declaration, type = Type
 // arr_name[size];

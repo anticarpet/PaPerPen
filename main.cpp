@@ -1,6 +1,8 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <chrono>
+#include <thread>
 
 #include "includes/glm/glm.hpp"
 #include <iostream>
@@ -82,67 +84,24 @@ int main()
     int rixPos = glGetUniformLocation(shaderProgram, "rix");
     int MVPos = glGetUniformLocation(shaderProgram, "MVP");
     int lightpos = glGetUniformLocation(shaderProgram, "light");
-    glm::vec4 light = glm::vec4(6, 1, 3, 1);
+    glm::vec4 light = glm::vec4(0, 1000, 500, 1);
 
     unsigned int VBO, VAO;
-    Vobj first = Vobj(1);
-    first.createVAO();
-    std::vector<float> verts = {
-        50,
-        0,
-        50,
-        50,
-        0,
-        -50,
-        -50,
-        0,
-        50,
-        -50,
-        0,
-        -50,
-        50,
-        0,
-        -50,
-        -50,
-        0,
-        50,
-    };
-
-    std::vector<float> vertsn = {
-        0, 1, 0,
-        0, 1, 0,
-        0, 1, 0,
-        0, 1, 0,
-        0, 1, 0,
-        0, 1, 0
-
-    };
-    first.createBuffer(0);
-    first.setObjectData(0, verts, 3);
-
-    first.createBuffer(1);
-    first.setObjectData(1, vertsn, 3);
-
-    first.createBuffer(2);
-    first.setObjectData(2, meshTexMap(1), 2);
-
-    first.assignProgram(shaderProgram);
 
     // TEXTURES
     // pixeldata
 
-    unsigned int pyr, sand;
+    unsigned int pyr, cat;
     glActiveTexture(GL_TEXTURE0);
     glGenTextures(1, &pyr);
-    glGenTextures(1, &sand);
+    glGenTextures(1, &cat);
 
     glBindTexture(GL_TEXTURE_2D, pyr);
     makeImgTexture("images/pyramid.png");
 
-    // unsigned int met;
-    // glGenTextures(1,&met);
-    // glBindTexture(GL_TEXTURE_2D, met);
-    // makeImgTexture("images/metal.png");
+    unsigned int chaotic;
+    std::vector<uint8_t> pattern2 = checkerboard(30, glm::vec4(0,0,0,0), glm::vec4(255,0,255,255));
+    quickTexture(chaotic, &pattern2[0], 30, 30);
 
     // framebuffers wow
     FBO fbo1 = FBO();
@@ -150,14 +109,7 @@ int main()
 
     // now we attach to the Fbuffer, so make a texture
     unsigned int Ftex;
-    glGenTextures(1, &Ftex);
-    glBindTexture(GL_TEXTURE_2D, Ftex);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 800, 600, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
+    quickTexture(Ftex, 800, 600);
     fbo1.bindTex(Ftex, 800, 600);
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -166,39 +118,15 @@ int main()
 
     // fbo1.addQueue()
 
-    glBindTexture(GL_TEXTURE_2D, sand);
-
     std::vector<uint8_t> pattern;
-    int patnum = 240;
-    for (int j = 0; j < (patnum) / 2; j++)
-    {
-        /* code */
+    int patnum = 30;
+    pattern = checkerboard(30, glm::vec4(0,0,0,0), glm::vec4(255,255,255,255));
 
-        for (int i = 0; i < (patnum) / 2; i++)
-        {
-            pattern.push_back(255);
-            pattern.push_back(255);
-            pattern.push_back(255);
-            pattern.push_back(255);
-            pattern.push_back(0);
-            pattern.push_back(0);
-            pattern.push_back(0);
-            pattern.push_back(0);
-        }
-        for (int i = 0; i < (patnum) / 2; i++)
-        {
-            pattern.push_back(0);
-            pattern.push_back(0);
-            pattern.push_back(0);
-            pattern.push_back(0);
-            pattern.push_back(255);
-            pattern.push_back(255);
-            pattern.push_back(255);
-            pattern.push_back(255);
-        }
-    }
+    unsigned int sand;
+    quickTexture(sand, &pattern[0], patnum, patnum);
 
-    makeTexture(&pattern[0], patnum, patnum);
+    glBindTexture(GL_TEXTURE_2D, cat);
+    makeImgTexture("images/cat.png");
 
     // makeImgTexture("images/sand.png");
     // makeImgTexture("images/pyramid.png");
@@ -211,20 +139,27 @@ int main()
 
     // attempt to make camera movement
 
-    glm::vec4 dir = glm::vec4(0, 1, 0, 1);
+    glm::vec4 dir = glm::vec4(-1, -1, -1, 1);
     glm::mat4 cameraRotation = glm::mat4(1.0f);
     glm::vec3 perp = glm::normalize(glm::cross(glm::vec3(dir.x, dir.y, dir.z), glm::vec3(0, 1, 0)));
-    glm::vec4 cPos = glm::vec4(10.001, 5, -10.001, 1);
+    glm::vec4 cPos = glm::vec4(10.001, 10, 10.001, 1);
     double xpos, ypos;
     // adham(window, xpos, ypos,cPos, perp);
 
-    first.setTexProgPos(texPos1);
-    first.setMatProgPos(rixPos);
-    first.setMVPatProgPos(MVPos);
-    first.setTexture(sand);
+    // first.setTexProgPos(texPos1);
+    // first.setMatProgPos(rixPos);
+    // first.setMVPatProgPos(MVPos);
+    // first.setTexture(sand);
 
-    first.setMat(glm::mat4(1.0f));   // resets matrix
-    first.transMat(glm::mat4(1.0f)); // translates matrix wrt time
+    // first.setMat(glm::mat4(1.0f));   // resets matrix
+    // first.transMat(glm::mat4(1.0f)); // translates matrix wrt time
+
+    Vobj first = Vobj(1);
+    first.useCubeTemplate(glm::vec3(50,0.2,50));
+    //first.transBuffer(0, glm::translate(glm::mat4(1.0f), glm::vec3(0, 3, 0)));
+    first.assignProgramAndPos(shaderProgram);
+    first.setTexture(sand);
+    first.setMat(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.001, 0)));
 
     // the donut
 
@@ -232,30 +167,29 @@ int main()
     three.useTemplate(donut, glm::vec4(0, 1, 0, 1), glm::vec4(0, -1, 0, 0), 28);
     //three.transBuffer(0, glm::translate(glm::mat4(1.0f), glm::vec3(10, -2, 10)));
 
-    
     // three.addTemplate(sphere, glm::vec4(0, 1, 0, 1), glm::vec4(0, 1, 0, 0), 28);
     three.assignProgramAndPos(shaderProgram);
 
-    three.setTexture(sand);
+    three.setTexture(cat);
 
     three.setMat(glm::translate(glm::mat4(1.0f), glm::vec3(0, 7, 0)));
 
     // // the cylinder face
 
-    // Vobj four = Vobj(1);
-    // four.useTemplate(cylinderF, glm::vec4(1, 0, 0, 1), glm::vec4(1, 0, 0, 0), 28);
-    // four.assignProgramAndPos(shaderProgram);
+    Vobj four = Vobj(1);
+    four.useTemplate(cylinderF, glm::vec4(1, 0, 0, 1), glm::vec4(1, 0, 0, 0), 28);
+    four.assignProgramAndPos(shaderProgram);
 
-    // four.setTexture(sand);
+    four.setTexture(sand);
 
-    // four.setMat(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.001, 0)));
-    // four.transMat(glm::scale(glm::mat4(1.0f), glm::vec3(1, 5, 1)));
+    four.setMat(glm::translate(glm::mat4(1.0f), glm::vec3(0, 0.001, 0)));
+    four.transMat(glm::scale(glm::mat4(1.0f), glm::vec3(1, 5, 1)));
 
-    // Vobj five = Vobj(1);                                                       // object creation
-    // five.useTemplate(disk, glm::vec4(0, 0, 0, 1), glm::vec4(0, -1, 0, 0), 28); // object uses template
-    // five.assignProgramAndPos(shaderProgram);                                   // use certain program
-    // five.setTexture(sand);                                                     // use certain texture
-    // five.setMat(glm::translate(glm::mat4(1.0f), glm::vec3(0, 5.001, 0)));      // set its position
+    Vobj five = Vobj(1);                                                       // object creation
+    five.useTemplate(disk, glm::vec4(0, 0, 0, 1), glm::vec4(0, -1, 0, 0), 28); // object uses template
+    five.assignProgramAndPos(shaderProgram);                                   // use certain program
+    five.setTexture(sand);                                                     // use certain texture
+    five.setMat(glm::translate(glm::mat4(1.0f), glm::vec3(0, 5.001, 0)));      // set its position
 
     // Vobj six = Vobj(1);
     // six.useTemplate(disk, glm::vec4(0, 0, 0, 1), glm::vec4(0, 1, 0, 0), 28);
@@ -278,15 +212,14 @@ int main()
     seven.useCubeTemplate(glm::vec3(1,2,3));
     seven.transBuffer(0, glm::translate(glm::mat4(1.0f), glm::vec3(0, 3, 0)));
     seven.assignProgramAndPos(shaderProgram);
-    seven.setTexture(sand);
+    seven.setTexture(cat);
     seven.setMat(glm::translate(glm::mat4(1.0f), glm::vec3(10, 0.001, 10)));
     //seven.transMat(glm::scale(glm::mat4(1.0f), glm::vec3(10, 5, 10)));
 
-
-    // fbo1.addQueue(&three, sand);
+    fbo1.addQueue(&three, sand);
     // fbo1.addQueue(&six, sand);
     fbo1.addQueue(&first, sand);
-    // fbo1.addQueue(&seven, sand);
+    fbo1.addQueue(&seven, sand);
     // six.transMat(glm::translate(glm::mat4(1.0f), glm::vec3(0, 2.501, 10)));
 
     // six.transMat(glm::translate(glm::mat4(1.0f), glm::vec3(0, 5, 10)));
@@ -309,91 +242,23 @@ int main()
 
     // the quad on screen.
     unsigned int SCREEN;
-    glGenTextures(1, &SCREEN);
-    glBindTexture(GL_TEXTURE_2D, SCREEN);
-    makeEmptyTexture(800, 600);
+    quickTexture(SCREEN, 800, 600);
 
     FBO screenFBO = FBO();
     screenFBO.createFBO();
-    
-    screenFBO.bindTex(SCREEN, 800, 600);
+    screenFBO.fbo = 0;
+    //screenFBO.bindTex(SCREEN, 800, 600);
     screenFBO.addQueue(&first, Ftex);
-    screenFBO.addQueue(&three, sand);
-    // screenFBO.addQueue(&four, sand);
-    // screenFBO.addQueue(&five, sand);
+    screenFBO.addQueue(&three, cat);
+    screenFBO.addQueue(&four, sand);
+    screenFBO.addQueue(&five, sand);
     // screenFBO.addQueue(&six, sand);
-    screenFBO.addQueue(&seven, sand);
+    screenFBO.addQueue(&seven, chaotic);
 
-    Vobj QUAD = Vobj(1);
-    QUAD.createVAO();
-    
-
-    std::vector<float> verts2 = {
-        -1, -1, 0,
-        1, -1, 0,
-        -1, 1, 0,
-
-        1, 1, 0,
-        1, -1, 0,
-        -1, 1, 0,
-
-
-    };
-
-    std::vector<float> vertsn2 = {
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-        1,
-    };
-
-    QUAD.createBuffer(0);
-    QUAD.setObjectData(0, verts2, 3);
-   
-    QUAD.createBuffer(1);
-    QUAD.setObjectData(1, vertsn2, 3);
-
-    QUAD.createBuffer(2);
-    QUAD.setObjectData(2, meshTexMap(1), 2);
-
-    QUAD.setTexProgPos(texPos1);
-    QUAD.setMatProgPos(rixPos);
-    QUAD.setMVPatProgPos(MVPos);
-
-    unsigned int VshQ = makeVShader(quadV);
-    unsigned int FshQ = makeFShader(quadF);
-    unsigned int SPQ = makeProgram(VshQ, FshQ);
-
-    QUAD.assignProgram(SPQ);
-    QUAD.setTexture(SCREEN);
-
-    QUAD.setMat(glm::translate(glm::mat4(1.0f), glm::vec3(0, 10, 0)));
-
-    // Vobj seven = Vobj(1);
-    // seven.useTemplate(disk, glm::vec4(0, 0, 0, 1), glm::vec4(0, -1, 0, 0), 28);
-    // seven.assignProgramAndPos(shaderProgram);                                   // use certain program
-    // seven.setTexture(sand);                                                     // use certain texture
-    // seven.setMat(glm::translate(glm::mat4(1.0f), glm::vec3(0, 15.001, 0)));  
-
-    
     while (!glfwWindowShouldClose(window))
     {
         time++;
+        std::this_thread::sleep_for(std::chrono::milliseconds(1000/60));
 
         // input
         // -----
@@ -425,7 +290,7 @@ int main()
         identity = glm::mat4(1.0f);
         glm::mat4 MVPmat = projectionMatrix * CameraMatrix * identity;
         // glUniformMatrix4fv(rixPos, 1, GL_FALSE, &MVPmat[0][0]);
-        //light = glm::rotate(glm::mat4(1.0f), (float)(0.01), glm::vec3(0, 1, 0)) * light;
+        light = glm::rotate(glm::mat4(1.0f), (float)(0.01), glm::vec3(0, 1, 0)) * light;
 
         glUniform4f(lightpos, light.x, light.y, light.z, light.w);
 
@@ -433,7 +298,7 @@ int main()
 
         // glBindFramebuffer(GL_FRAMEBUFFER, fbo1.fbo);
         fbo1.use();
-        // six.transMat( rotateAbout(glm::mat4(1.0f),0.01,glm::vec3(0, 1, 0), glm::vec4(4,6,8,1)));
+        four.transMat( rotateAbout(glm::mat4(1.0f),2*M_PI/60.0,glm::vec3(0, 1, 0.5), glm::vec4(0,0,0,1)));
         fbo1.clearTex(255, 255, 255, 1);
         fbo1.render();
 
@@ -446,19 +311,7 @@ int main()
         screenFBO.render();
 
         
-        //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-       
-
-        QUAD.setMVPat(glm::mat4(1.0f));
-        QUAD.quickDraw();
-
-        // seven.setMVPat(MVPmat);
-        // seven.quickDraw();
-
-        // pyramids
-
-        // sec.quickDraw();
+ 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

@@ -100,4 +100,18 @@ void FBO::makeMVPat(glm::vec3 pos, glm::vec3 dir, glm::mat4 proj){
 
 }
 
+void SCREEN::render(){
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    //glBindTexture(GL_TEXTURE_2D, tex);
 
+    for (int i = 0; i < queue.size(); i++)
+    {
+        //glBindFramebuffer(GL_FRAMEBUFFER,fbo);
+        (*queue[i]).setMVPat(MVPat);
+        (*queue[i]).setTexture(texts[i]);
+        (*queue[i]).quickDraw();
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER,0);
+    //glBindTexture(GL_TEXTURE_2D, 0);
+
+}
